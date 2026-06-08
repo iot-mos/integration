@@ -183,9 +183,9 @@
     <!-- ===== INFO ===== -->
     <div class="info">
       <h2 class="title">
-        IoT-MOS MQTT API
+        IoT-MOS  <span class="spec-badge">MQTT API</span> 
         <span class="version">1.0.1</span>
-        <span class="spec-badge">MQTT · ASYNCAPI 3.0.0</span>
+       
       </h2>
       <div class="meta">
         <span class="lic">Proprietary</span>
@@ -217,7 +217,7 @@
         </span>
         <span><span class="name">x509</span> <span class="type">(mutual TLS)</span></span>
       </div>
-      <p>Mutual TLS using an X.509 client certificate issued by IoT-MOS and bound to your <code>companyId</code>. There is no token to paste — authentication is performed by the certificate presented during the TLS handshake. The broker enforces tenant isolation, so you only receive topics under your own <code>companyId</code>.</p>
+      <p>Mutual TLS using an X.509 client certificate issued by IoT-MOS and bound to your <code>companyId</code>. There is no token to paste — authentication is performed by the certificate presented during the TLS handshake.</p>
     </div>
 
     <!-- ===== CHANNEL / OPERATION ===== -->
@@ -273,7 +273,7 @@
             <tr><td><div class="p-name">boothid</div><div class="p-type">string</div></td><td><div class="p-desc">Logical sensor identifier.</div></td></tr>
             <tr><td><div class="p-name">sensorid</div><div class="p-type">string</div></td><td><div class="p-desc">Physical sensor identifier.</div></td></tr>
             <tr><td><div class="p-name">type</div><div class="p-type">string</div></td><td><div class="p-desc">Sensor type.</div></td></tr>
-            <tr><td><div class="p-name">metrics</div><div class="p-type">object</div></td><td><div class="p-desc">Current sensor state. The field names vary according to the type of a sensor. Visit (<a href="https://iot-mos.github.io/metric-map/#/" target="_blank" rel="noopener">https://iot-mos.github.io/metric-map/#/</a>).</div></td></tr>
+            <tr><td><div class="p-name">metrics</div><div class="p-type">object</div></td><td><div class="p-desc">Current sensor state. The field names vary by sensor type — see the <a href="../sensor-metrics-map.html" target="_blank" rel="noopener">sensor metric map</a> for the fields and values per sensor.</div></td></tr>
           </tbody>
         </table>
 
