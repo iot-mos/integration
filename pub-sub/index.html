@@ -4,23 +4,370 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IoT-MOS MQTT API Reference</title>
-  <link rel="icon" href="../req-res/favicon.svg">
-  <link rel="stylesheet" href="https://unpkg.com/@asyncapi/react-component@2.6.4/styles/default.min.css">
+  <link rel="icon" type="image/svg+xml" href="../req-res/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <style>
-    /* Declare the page as light-only so the browser's dark mode doesn't tint
-       the empty background around the fixed-width documentation column. */
-    :root { color-scheme: only light; }
-    html, body { margin: 0; background: #ffffff; }
+    :root{
+      --text:#3b4151;
+      --blue:#61affe;        /* subscribe / receive */
+      --blue-bg:rgba(97,175,254,.1);
+      --green:#49cc90;       /* auth */
+      --green-bg:rgba(73,204,144,.1);
+      --border:#d9d9d9;
+      --muted:#62676d;
+      --code-bg:#282c34;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      background:#fafafa;
+      color:var(--text);
+      font-family:"Open Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      font-size:14px;line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+    }
+    h1,h2,h3,h4,h5,.ttl{font-family:"Titillium Web",sans-serif}
+    code,pre,.mono{font-family:"Source Code Pro",monospace}
+    a{color:#4990e2;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* shared header strip (matches the OpenAPI/Swagger page) */
+    .site-header{
+      background:#dedede;color:#fff;padding:12px 32px;
+      display:flex;align-items:center;gap:16px;
+      box-shadow:0 2px 4px rgba(0,0,0,.1);
+    }
+    .site-header img{height:40px;width:auto}
+
+    .ui{max-width:1460px;margin:0 auto;padding:20px}
+
+    /* ---- info block ---- */
+    .info{margin:30px 22px 10px}
+    .info .title{
+      font-size:36px;font-weight:600;color:var(--text);margin:0;
+      display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+    }
+    .info .version{
+      font-size:14px;font-weight:600;color:#fff;background:#7d8492;
+      padding:4px 10px;border-radius:57px;line-height:1;
+    }
+    .info .spec-badge{
+      font-family:"Source Code Pro",monospace;font-size:11px;font-weight:600;
+      color:#3b4151;border:2px solid #3b4151;border-radius:4px;padding:2px 6px;letter-spacing:.04em;
+    }
+    .info .meta{margin:10px 0 6px;display:flex;gap:18px;flex-wrap:wrap;font-size:13px}
+    .info .meta .lic{
+      display:inline-block;border:1px solid var(--muted);color:var(--muted);
+      border-radius:4px;padding:1px 8px;font-weight:600;
+    }
+    .info .description{margin-top:14px;font-size:15px;color:#3b4151;max-width:62rem}
+
+    /* ---- servers ---- */
+    .servers{margin:24px 22px;padding:18px 20px;background:#fff;border:1px solid var(--border);border-radius:4px}
+    .servers .lbl,.scheme .lbl{font-family:"Titillium Web";font-size:13px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.03em}
+    .server-url{
+      display:inline-block;margin-top:8px;font-family:"Source Code Pro",monospace;
+      font-size:15px;font-weight:600;color:var(--text);
+      background:#f2f4f7;border:1px solid var(--border);border-radius:4px;padding:7px 12px;
+    }
+    .server-url .tag{color:#9012fe}
+    .kv{margin-top:10px;font-size:13px;color:var(--muted)}
+    .kv b{color:var(--text);font-family:"Source Code Pro",monospace;font-weight:600}
+
+    /* ---- auth / scheme container ---- */
+    .scheme{
+      margin:24px 22px;background:#fff;border:1px solid var(--border);border-radius:4px;
+      box-shadow:0 1px 2px rgba(0,0,0,.1);padding:16px 20px;
+    }
+    .scheme .top{display:flex;align-items:center;gap:14px}
+    .btn-auth{
+      display:inline-flex;align-items:center;gap:8px;
+      border:2px solid var(--green);color:var(--green);background:transparent;
+      border-radius:4px;padding:7px 16px;font-family:"Titillium Web";font-weight:700;font-size:14px;cursor:default;
+    }
+    .btn-auth svg{width:16px;height:16px;fill:var(--green)}
+    .scheme .name{font-family:"Source Code Pro";font-weight:600}
+    .scheme .type{color:var(--muted);font-size:12px}
+    .scheme p{margin:12px 0 0;color:#3b4151}
+
+    /* ---- tag section header ---- */
+    .opblock-tag{
+      font-family:"Titillium Web";font-size:24px;font-weight:600;color:var(--text);
+      margin:40px 22px 0;padding:12px 0 8px;border-bottom:1px solid rgba(59,65,81,.3);
+      display:flex;align-items:center;gap:12px;
+    }
+    .opblock-tag .small{font-family:"Open Sans";font-size:13px;font-weight:400;color:var(--muted)}
+
+    /* ---- operation block ---- */
+    .opblock{
+      margin:15px 22px;border:1px solid var(--blue);border-radius:4px;
+      background:var(--blue-bg);box-shadow:0 0 3px rgba(0,0,0,.19);
+    }
+    .opblock-summary{
+      display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;
+    }
+    .method{
+      font-family:"Titillium Web";font-weight:700;font-size:14px;color:#fff;
+      background:var(--blue);border-radius:3px;padding:7px 12px;min-width:104px;text-align:center;
+      text-shadow:0 1px 0 rgba(0,0,0,.1);letter-spacing:.02em;
+    }
+    .summary-path{font-family:"Source Code Pro",monospace;font-size:16px;font-weight:600;color:var(--text);word-break:break-all}
+    .summary-desc{margin-left:auto;text-align:right;font-size:13px;color:var(--muted);max-width:40ch}
+    .caret{margin-left:6px;color:var(--text);transition:transform .15s}
+    .opblock.collapsed .caret{transform:rotate(-90deg)}
+    .opblock.collapsed .opblock-body{display:none}
+
+    .opblock-body{padding:4px 20px 20px}
+    .opblock-body>.lead{margin:14px 0 4px;color:#3b4151}
+    .section-header{
+      background:hsla(0,0%,100%,.8);box-shadow:0 1px 2px rgba(0,0,0,.1);
+      border-radius:4px;padding:8px 16px;margin:18px 0 10px;
+      font-family:"Titillium Web";font-size:14px;font-weight:700;color:var(--text);
+      display:flex;align-items:center;gap:10px;
+    }
+    .pill-ct{font-family:"Source Code Pro";font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 7px;background:#fff}
+
+    /* ---- tables (params + schema) ---- */
+    table.tbl{width:100%;border-collapse:collapse}
+    table.tbl thead th{
+      text-align:left;font-family:"Titillium Web";font-size:12px;font-weight:700;color:var(--text);
+      text-transform:uppercase;letter-spacing:.03em;padding:10px 12px;border-bottom:1px solid rgba(59,65,81,.2);
+    }
+    table.tbl td{padding:12px;border-bottom:1px solid rgba(59,65,81,.12);vertical-align:top}
+    table.tbl tr:last-child td{border-bottom:none}
+    .p-name{font-family:"Source Code Pro";font-weight:600;font-size:14px;color:var(--text)}
+    .p-req{color:#f93e3e;font-size:11px;font-weight:700;text-transform:uppercase;font-family:"Titillium Web";margin-top:3px}
+    .p-type{font-family:"Source Code Pro";font-size:12px;color:var(--muted);margin-top:3px}
+    .p-loc{font-size:11px;color:#9012fe;font-family:"Source Code Pro";margin-top:2px}
+    .p-desc{color:#3b4151;font-size:13.5px}
+    .enum{margin-top:8px;font-size:12px;color:var(--muted)}
+    .enum code{background:#f2f4f7;border:1px solid var(--border);border-radius:4px;padding:1px 7px;margin-right:6px;color:var(--text)}
+    td code,.p-desc code{font-family:"Source Code Pro";background:#f2f4f7;border-radius:4px;padding:1px 6px;font-size:.9em}
+
+    /* ---- examples / code ---- */
+    .ex-label{font-family:"Titillium Web";font-size:13px;font-weight:600;color:var(--text);margin:16px 0 6px}
+    .ex-label .sub{font-family:"Open Sans";font-weight:400;color:var(--muted)}
+    pre{
+      background:var(--code-bg);border-radius:4px;margin:0 0 12px;padding:16px 18px;overflow-x:auto;
+      font-family:"Source Code Pro",monospace;font-size:13px;line-height:1.6;
+    }
+    pre code{font-family:"Source Code Pro",monospace;background:none;padding:0}
+
+    /* ---- quick start ---- */
+    .qs{margin:15px 22px;background:#fff;border:1px solid var(--border);border-radius:4px;padding:6px 22px 22px}
+    .qs p{color:#3b4151}
+    .qs h4{font-size:15px;margin:18px 0 8px;color:var(--text)}
+
+    footer{margin:50px 22px 40px;padding-top:16px;border-top:1px solid var(--border);
+      font-family:"Source Code Pro";font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+    @media(max-width:760px){
+      .summary-desc{display:none}
+      .info .title{font-size:28px}
+      table.tbl,table.tbl tbody,table.tbl tr,table.tbl td{display:block;width:100%}
+      table.tbl thead{display:none}
+    }
   </style>
 </head>
 <body>
-  <div id="asyncapi"></div>
-  <script src="https://unpkg.com/@asyncapi/react-component@2.6.4/browser/standalone/index.js"></script>
-  <script>
-    AsyncApiStandalone.render({
-      schema: { url: 'asyncapi.yaml' },
-      config: { show: { sidebar: true, errors: true } }
-    }, document.getElementById('asyncapi'));
-  </script>
+
+  <header class="site-header">
+    <img src="../req-res/logo.png" alt="IoT-MOS logo">
+  </header>
+
+  <div class="ui">
+
+    <!-- ===== INFO ===== -->
+    <div class="info">
+      <h2 class="title">
+        IoT-MOS MQTT API
+        <span class="version">1.0.1</span>
+        <span class="spec-badge">MQTT · ASYNCAPI 3.0.0</span>
+      </h2>
+      <div class="meta">
+        <span class="lic">Proprietary</span>
+        <span>Contact: IoT-MOS API Support</span>
+      </div>
+      <div class="description">
+        Real-time sensor data streamed over MQTT via IoT-MOS. Subscribe to a topic and the
+        broker pushes a JSON reading whenever a sensor event occurs. Use this channel for
+        live use cases (floor maps, occupancy displays, alerts). For historical or aggregated
+        data, use the <a href="../req-res/" target="_blank" rel="noopener">HTTP REST API</a> instead.
+      </div>
+    </div>
+
+    <!-- ===== SERVERS ===== -->
+    <div class="servers">
+      <div class="lbl">Servers</div>
+      <div class="server-url"><span class="tag">secure-mqtt://</span>{endpoint}<span class="tag"></span></div>
+      <span style="margin-left:10px;color:var(--muted);font-size:13px">production · MQTT over TLS</span>
+      <p class="kv" style="margin-top:12px">MQTT broker over TLS. The host is your account-specific endpoint, provided by IoT-MOS during onboarding.</p>
+      <div class="kv"><b>endpoint</b> — Provided by IoT-MOS.</div>
+    </div>
+
+    <!-- ===== AUTH ===== -->
+    <div class="scheme">
+      <div class="top">
+        <span class="btn-auth">
+          <svg viewBox="0 0 20 20"><path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C6.672 18.861 8.55 19 10 19c1.45 0 3.326-.139 3.85-.307l1.199-.387c.523-.166.951-.754.951-1.303V9.199C16 8.646 15.553 8 15.8 8zM10 15.5a1.5 1.5 0 11.001-3.001A1.5 1.5 0 0110 15.5zM12 8H8V5.199C8 3.754 8.797 3 10 3s2 .754 2 2.199V8z"/></svg>
+          Authorize
+        </span>
+        <span><span class="name">x509</span> <span class="type">(mutual TLS)</span></span>
+      </div>
+      <p>Mutual TLS using an X.509 client certificate issued by IoT-MOS and bound to your <code>companyId</code>. There is no token to paste — authentication is performed by the certificate presented during the TLS handshake. The broker enforces tenant isolation, so you only receive topics under your own <code>companyId</code>.</p>
+    </div>
+
+    <!-- ===== CHANNEL / OPERATION ===== -->
+    <div class="opblock-tag">sensorData <span class="small">One sensor's live readings, streamed as they happen.</span></div>
+
+    <div class="opblock" id="op-sub">
+      <div class="opblock-summary" onclick="document.getElementById('op-sub').classList.toggle('collapsed')">
+        <span class="method">SUBSCRIBE</span>
+        <span class="summary-path">iotmos-api/v1/{env}/{companyId}/{buildingId}/{roomId}/{boothId}</span>
+        <span class="summary-desc">Live readings for one sensor</span>
+        <span class="caret">▾</span>
+      </div>
+      <div class="opblock-body">
+        <p class="lead">Subscribe with MQTT wildcards to widen scope: use <code>+</code> for a single level (all sensors/booths in a room) or <code>#</code> for everything below a level (all sensors/booths in a company or building).</p>
+
+        <div class="section-header">Topic parameters</div>
+        <table class="tbl">
+          <thead><tr><th style="width:230px">Name</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="p-name">env</div><div class="p-type">string</div><div class="p-loc">topic</div><div class="p-req">required</div></td>
+              <td>
+                <div class="p-desc">Environment isolation segment.</div>
+                <div class="enum">Available values: <code>test</code><code>live</code></div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="p-name">companyId</div><div class="p-type">string</div><div class="p-loc">topic</div><div class="p-req">required</div></td>
+              <td><div class="p-desc">Tenant root. This is the authorization boundary; you can only subscribe within your own <code>companyId</code>.</div></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">buildingId</div><div class="p-type">string</div><div class="p-loc">topic</div></td>
+              <td><div class="p-desc">Logical site identifier. Use <code>+</code> or <code>#</code> to subscribe across buildings.</div></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">roomId</div><div class="p-type">string</div><div class="p-loc">topic</div></td>
+              <td><div class="p-desc">Logical room identifier. Use <code>+</code> or <code>#</code> to subscribe across rooms.</div></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">boothId</div><div class="p-type">string</div><div class="p-loc">topic</div></td>
+              <td><div class="p-desc">Booth / sensor identifier. Use <code>+</code> or <code>#</code> to subscribe across booths.</div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="section-header">Message — Sensor Status Reading <span class="pill-ct">application/json</span></div>
+        <p class="lead" style="margin-top:0">A single sensor reading for one sensor. JSON payload of a sensor status reading. Field set is indicative; refer to onboarding materials for the authoritative sensor schema per sensor type.</p>
+        <table class="tbl">
+          <thead><tr><th style="width:230px">Field</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><div class="p-name">buildingid</div><div class="p-type">string</div></td><td><div class="p-desc">Logical site identifier.</div></td></tr>
+            <tr><td><div class="p-name">roomid</div><div class="p-type">string</div></td><td><div class="p-desc">Logical room identifier.</div></td></tr>
+            <tr><td><div class="p-name">boothid</div><div class="p-type">string</div></td><td><div class="p-desc">Logical sensor identifier.</div></td></tr>
+            <tr><td><div class="p-name">sensorid</div><div class="p-type">string</div></td><td><div class="p-desc">Physical sensor identifier.</div></td></tr>
+            <tr><td><div class="p-name">type</div><div class="p-type">string</div></td><td><div class="p-desc">Sensor type.</div></td></tr>
+            <tr><td><div class="p-name">metrics</div><div class="p-type">object</div></td><td><div class="p-desc">Current sensor state. The field names vary according to the type of a sensor. Visit (<a href="https://iot-mos.github.io/metric-map/#/" target="_blank" rel="noopener">https://iot-mos.github.io/metric-map/#/</a>).</div></td></tr>
+          </tbody>
+        </table>
+
+        <div class="section-header">Examples</div>
+
+        <div class="ex-label">occupied <span class="sub">— SSA sensor reading</span></div>
+        <pre><code class="language-json">{
+  "buildingid": "10",
+  "roomid": "12",
+  "boothid": "250",
+  "sensorid": "FEE000123",
+  "type": "SSA",
+  "metrics": {
+    "status": "OPEN",
+    "dbm": "-45",
+    "timestamp": "2026-04-24T14:47:00.382 JST"
+  }
+}</code></pre>
+
+        <div class="ex-label">motion <span class="sub">— MOTION sensor reading</span></div>
+        <pre><code class="language-json">{
+  "buildingid": "18",
+  "roomid": "25",
+  "boothid": "140",
+  "sensorid": "042413B8",
+  "type": "MOTION",
+  "metrics": {
+    "dbm": "-55",
+    "occupancy": "OCCUPIED",
+    "supplyvoltage": "2.96",
+    "timestamp": "2026-06-08T13:21:01.948 JST",
+    "voltagesupported": "YES"
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- ===== QUICK START (last section) ===== -->
+    <div class="opblock-tag">Quick start <span class="small">Python · paho-mqtt</span></div>
+    <div class="qs">
+      <h4>Install the MQTT client</h4>
+      <pre><code class="language-bash">pip install paho-mqtt</code></pre>
+
+      <p>Connect over TLS with your X.509 client certificate and subscribe. Use <code>+</code> to match a single topic level (e.g. all booths in a room) or <code>#</code> to match everything below a level (e.g. all sensors in your company):</p>
+      <pre><code class="language-python">import json
+import ssl
+import paho.mqtt.client as mqtt
+
+ENDPOINT    = "your-endpoint.iot-mos.example"  # provided by IoT-MOS during onboarding
+PORT        = 8883                             # MQTT over TLS (secure-mqtt)
+COMPANY_ID  = "your-company-id"
+
+# X.509 client certificate (mutual TLS), issued by IoT-MOS during onboarding
+CA_CERT     = "iotmos-ca.pem"
+CLIENT_CERT = "client.crt"
+CLIENT_KEY  = "client.key"
+
+# Topic: iotmos-api/v1/{env}/{companyId}/{buildingId}/{roomId}/{boothId}
+# Subscribe to every sensor in your company, live environment:
+TOPIC = f"iotmos-api/v1/live/{COMPANY_ID}/#"
+
+def on_connect(client, userdata, flags, reason_code, properties):
+    if reason_code == 0:
+        print(f"Connected. Subscribing to {TOPIC}")
+        client.subscribe(TOPIC, qos=1)
+    else:
+        print(f"Connection refused: {reason_code}")
+
+def on_message(client, userdata, msg):
+    reading = json.loads(msg.payload)
+    print(f"[{msg.topic}] {reading['sensorid']} ({reading['type']}): {reading['metrics']}")
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, protocol=mqtt.MQTTv5)
+client.tls_set(
+    ca_certs=CA_CERT,
+    certfile=CLIENT_CERT,
+    keyfile=CLIENT_KEY,
+    tls_version=ssl.PROTOCOL_TLS_CLIENT,
+)
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect(ENDPOINT, PORT, keepalive=60)
+client.loop_forever()   # blocks and reconnects automatically</code></pre>
+    </div>
+
+    <footer>
+      <span>IoT-MOS MQTT API · v1.0.1</span>
+      <span>MQTT over TLS · X.509 mutual auth</span>
+    </footer>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>if(window.hljs){hljs.highlightAll();}</script>
 </body>
 </html>
