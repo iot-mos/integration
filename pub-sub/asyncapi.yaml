@@ -3,12 +3,88 @@ asyncapi: 3.0.0
 info:
   title: IoT-MOS MQTT API
   version: 1.0.1
-  description: >
-    Real-time  sensor data streamed over MQTT via Iot-Mos system.
-    Subscribe to a topic and the broker pushes a JSON reading whenever a
-    sensor event occurs. Use this channel for live use cases (floor maps,
-    occupancy displays, alerts). For historical or aggregated data, use the
-    HTTP REST API instead.
+  description: |
+    Real-time sensor data streamed over MQTT via IoT-MOS. Subscribe to a topic and the
+    broker pushes a JSON reading whenever a sensor event occurs. Use this channel for
+    live use cases (floor maps, occupancy displays, alerts). For historical or
+    aggregated data, use the HTTP REST API instead.
+
+    ## Quick start (Python)
+
+    Install the MQTT client:
+
+    ```bash
+    pip install paho-mqtt
+    ```
+
+    Connect over TLS with your X.509 client certificate and subscribe. Use `+` to match
+    a single topic level (e.g. all booths in a room) or `#` to match everything below a
+    level (e.g. all sensors in your company):
+
+    ```python
+    import json
+    import ssl
+    import paho.mqtt.client as mqtt
+
+    ENDPOINT    = "your-endpoint.iot-mos.example"  # provided by IoT-MOS during onboarding
+    PORT        = 8883                             # MQTT over TLS (secure-mqtt)
+    COMPANY_ID  = "your-company-id"
+
+    # X.509 client certificate (mutual TLS), issued by IoT-MOS during onboarding
+    CA_CERT     = "iotmos-ca.pem"
+    CLIENT_CERT = "client.crt"
+    CLIENT_KEY  = "client.key"
+
+    # Topic: iotmos-api/v1/{env}/{companyId}/{buildingId}/{roomId}/{boothId}
+    # Subscribe to every sensor in your company, live environment:
+    TOPIC = f"iotmos-api/v1/live/{COMPANY_ID}/#"
+
+    def on_connect(client, userdata, flags, reason_code, properties):
+        if reason_code == 0:
+            print(f"Connected. Subscribing to {TOPIC}")
+            client.subscribe(TOPIC, qos=1)
+        else:
+            print(f"Connection refused: {reason_code}")
+
+    def on_message(client, userdata, msg):
+        reading = json.loads(msg.payload)
+        print(f"[{msg.topic}] {reading['sensorid']} ({reading['type']}): {reading['metrics']}")
+
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, protocol=mqtt.MQTTv5)
+    client.tls_set(
+        ca_certs=CA_CERT,
+        certfile=CLIENT_CERT,
+        keyfile=CLIENT_KEY,
+        tls_version=ssl.PROTOCOL_TLS_CLIENT,
+    )
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    client.connect(ENDPOINT, PORT, keepalive=60)
+    client.loop_forever()   # blocks and reconnects automatically
+    ```
+
+    ### Example message
+
+    Each reading is a JSON object. The top-level fields are fixed; the `metrics`
+    object varies by sensor type:
+
+    ```json
+    {
+      "buildingid": "18",
+      "roomid": "25",
+      "boothid": "140",
+      "sensorid": "042413B8",
+      "type": "MOTION",
+      "metrics": {
+        "dbm": "-55",
+        "occupancy": "OCCUPIED",
+        "supplyvoltage": "2.96",
+        "timestamp": "2026-06-08T13:21:01.948 JST",
+        "voltagesupported": "YES"
+      }
+    }
+    ```
   contact:
     name: IoT-MOS API Support
   license:
@@ -67,14 +143,31 @@ components:
         $ref: '#/components/schemas/SensorReadingPayload'
       examples:
         - name: occupied
-          summary: A sensor reading
+          summary: SSA sensor reading
           payload:
-            buildingId: '10'
-            roomId: '12'
-            boothId: '250'
-            sensorId: 'FEE000123'
-            type: "SSA"
-            metrics: {"status":"OPEN","dbm":"-45","timestamp":"2026-04-24T14:47:00.382 JST"}
+            buildingid: '10'
+            roomid: '12'
+            boothid: '250'
+            sensorid: 'FEE000123'
+            type: 'SSA'
+            metrics:
+              status: 'OPEN'
+              dbm: '-45'
+              timestamp: '2026-04-24T14:47:00.382 JST'
+        - name: motion
+          summary: MOTION sensor reading
+          payload:
+            buildingid: '18'
+            roomid: '25'
+            boothid: '140'
+            sensorid: '042413B8'
+            type: 'MOTION'
+            metrics:
+              dbm: '-55'
+              occupancy: 'OCCUPIED'
+              supplyvoltage: '2.96'
+              timestamp: '2026-06-08T13:21:01.948 JST'
+              voltagesupported: 'YES'
 
   schemas:
     SensorReadingPayload:
@@ -84,16 +177,16 @@ components:
         refer to onboarding materials for the authoritative sensor schema
         per sensor type.
       properties:
-        buildingId:
+        buildingid:
           type: string
           description: Logical site identifier.
-        roomId:
+        roomid:
           type: string
           description: Logical room identifier.
-        boothId:
+        boothid:
           type: string
           description: Logical sensor identifier.
-        sensorId:
+        sensorid:
           type: string
           description: Physical sensor identifier.
         type:
