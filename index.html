@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IoT-MOS API — Integration Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Spline+Sans+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10211c;
+    --paper:#f4f1e9;
+    --paper-2:#ebe6d8;
+    --accent:#E4007F;
+    --accent-2:#8a1054;
+    --line:#1021211a;
+    --mute:#5d6b63;
+    --code-bg:#0d1f1a;
+    --code-ink:#d8e8df;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Inter Tight",sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid #E4007F44;transition:.15s}
+  a:hover{border-color:var(--accent);background:#E4007F10}
+
+  /* header */
+  header{
+    border-bottom:2px solid var(--ink);
+    background:
+      repeating-linear-gradient(90deg,transparent,transparent 38px,#10211108 38px,#10211108 39px),
+      var(--paper);
+  }
+  .masthead{padding:54px 0 38px}
+  .kicker{
+    font-family:"Spline Sans Mono",monospace;
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent);display:flex;gap:14px;align-items:center;
+  }
+  .kicker::after{content:"";flex:1;height:1px;background:var(--line)}
+  h1{
+    font-family:"Fraunces",serif;
+    font-weight:900;
+    font-size:clamp(40px,7vw,76px);
+    line-height:.98;letter-spacing:-.02em;
+    margin:18px 0 14px;
+  }
+  h1 em{font-style:italic;color:var(--accent)}
+  .lede{font-size:clamp(17px,2.2vw,21px);max-width:60ch;color:#2a3a33}
+
+  /* nav */
+  nav.toc{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);color:var(--ink);
+    border-bottom:2px solid var(--ink);
+  }
+  nav.toc .wrap{display:flex;gap:0;flex-wrap:wrap;align-items:stretch}
+  nav.toc a{
+    color:var(--ink);border:none;
+    font-family:"Spline Sans Mono",monospace;font-size:12.5px;
+    letter-spacing:.05em;padding:15px 20px 13px;
+    border-bottom:3px solid transparent;background:none;
+    display:flex;align-items:center;gap:9px;
+  }
+  nav.toc a .n{color:#ff5cb0;font-weight:600}
+  nav.toc a:hover{background:#ffffff12;border-bottom-color:#ff5cb0}
+
+  main{padding:8px 0 90px}
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:26px}
+  .sec-num{
+    font-family:"Spline Sans Mono",monospace;font-size:13px;
+    color:var(--accent-2);font-weight:600;padding-top:8px;
+  }
+  h2{
+    font-family:"Fraunces",serif;font-weight:600;
+    font-size:clamp(28px,4.2vw,42px);letter-spacing:-.01em;line-height:1.05;
+  }
+  h3{font-family:"Inter Tight";font-weight:600;font-size:19px;margin:30px 0 10px}
+  p{margin:0 0 16px;max-width:68ch}
+  .muted{color:var(--mute)}
+
+  /* model diagram */
+  .flow{
+    display:flex;align-items:stretch;flex-wrap:wrap;gap:0;margin:8px 0 8px;
+    border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--paper-2);
+  }
+  .flow .node{
+    flex:1;min-width:120px;padding:20px 16px;text-align:center;
+    border-right:1px solid var(--line);position:relative;
+  }
+  .flow .node:last-child{border-right:none}
+  .flow .node .lbl{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+  .flow .node .val{font-family:"Fraunces",serif;font-weight:600;font-size:20px;margin-top:4px}
+  .flow .node .arrow{position:absolute;right:-9px;top:50%;transform:translateY(-50%);z-index:3;color:var(--accent);font-size:18px}
+
+  /* two-channel cards */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:10px}
+  .card{
+    border:2px solid var(--ink);border-radius:16px;padding:26px;
+    background:var(--paper-2);position:relative;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px}
+  .card.http::before{background:var(--accent)}
+  .card.mqtt::before{background:var(--accent-2)}
+  .card h3{margin-top:6px;font-size:15px;font-family:"Spline Sans Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+  .card .title{font-family:"Fraunces",serif;font-weight:900;font-size:28px;margin:2px 0 12px;letter-spacing:-.01em}
+  .card.http .title{color:var(--accent)}
+  .card.mqtt .title{color:var(--accent-2)}
+  .card ul{list-style:none;margin:10px 0 0}
+  .card li{padding:7px 0;border-top:1px dashed var(--line);font-size:14.5px;display:flex;gap:10px}
+  .card li b{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.05em;color:var(--mute);min-width:84px;text-transform:uppercase;padding-top:3px}
+
+  /* comparison table */
+  .tbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:14.5px;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+  .tbl th,.tbl td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  .tbl thead th{background:var(--paper-2);color:var(--ink);font-family:"Spline Sans Mono",monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  .tbl tbody tr:nth-child(even){background:#10211108}
+  .tbl td:first-child{font-weight:600}
+  .tbl .h{color:var(--accent);font-weight:600}
+  .tbl .m{color:var(--accent-2);font-weight:600}
+
+  /* callout */
+  .callout{
+    border-left:4px solid var(--accent-2);background:#8a10540f;
+    padding:18px 22px;border-radius:0 12px 12px 0;margin:22px 0;
+  }
+  .callout .k{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2);font-weight:600}
+
+  /* code */
+  pre{
+    background:var(--code-bg);color:var(--code-ink);
+    border-radius:12px;padding:20px 22px;overflow-x:auto;
+    font-family:"Spline Sans Mono",monospace;font-size:13.5px;line-height:1.7;
+    margin:14px 0;border:1px solid #ffffff14;
+  }
+  code{font-family:"Spline Sans Mono",monospace}
+  p code,li code,td code{background:#10211110;padding:2px 7px;border-radius:6px;font-size:.88em;color:var(--accent)}
+  pre .c{color:#5e8a78}
+  pre .t{color:#ff5cb0}
+  pre .v{color:#e8c06a}
+
+  /* link blocks */
+  .linkbox{
+    display:flex;align-items:center;gap:20px;
+    border:2px solid var(--ink);border-radius:16px;padding:22px 24px;
+    background:var(--paper-2);margin:14px 0;text-decoration:none;color:var(--ink);
+    transition:.18s;
+  }
+  a.linkbox:hover{background:var(--ink);color:var(--paper);transform:translateX(4px)}
+  a.linkbox:hover .lb-sub,a.linkbox:hover .lb-arrow{color:var(--paper)}
+  .lb-ic{font-family:"Spline Sans Mono",monospace;font-weight:600;font-size:12px;letter-spacing:.1em;border:1px solid currentColor;border-radius:8px;padding:9px 11px;white-space:nowrap}
+  .lb-main{flex:1}
+  .lb-title{font-family:"Fraunces",serif;font-weight:600;font-size:21px}
+  .lb-sub{font-size:14px;color:var(--mute)}
+  .lb-arrow{font-size:24px;color:var(--accent)}
+
+  /* decision guide */
+  .qa{counter-reset:q;margin-top:8px}
+  .qa .q{
+    border:2px solid var(--ink);border-radius:14px;padding:20px 22px 20px 64px;
+    position:relative;margin-bottom:14px;background:var(--paper-2);
+  }
+  .qa .q::before{
+    counter-increment:q;content:counter(q);
+    position:absolute;left:18px;top:18px;
+    width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);
+    display:grid;place-items:center;font-family:"Fraunces",serif;font-weight:600;
+  }
+  .qa .q .ask{font-weight:600;font-size:16px;margin-bottom:4px}
+  .qa .q .ans{font-size:14.5px;color:var(--mute)}
+  .qa .q .ans b{color:var(--accent);font-family:"Spline Sans Mono",monospace;font-size:13px}
+
+  footer{padding:40px 0 60px;font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--mute)}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:center}
+
+  @media(max-width:760px){
+    .cards{grid-template-columns:1fr}
+    .flow{flex-direction:column}
+    .flow .node{border-right:none;border-bottom:1px solid var(--line)}
+    .flow .node .arrow{display:none}
+    nav.toc a{padding:12px 14px;font-size:11px}
+    .tbl{display:block;overflow-x:auto;white-space:nowrap}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap masthead">
+    <div class="kicker">IoT-MOS · API Integration Guide</div>
+    <h1>Connect the<br><em>sensor data.</em></h1>
+    <p class="lede">IoT-MOS exposes sensor data through two complementary channels: one for querying, one for streaming. Pick whichever fits use case, or use both together.</p>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#model"><span class="n">01</span> Integration Model</a>
+    <a href="#http"><span class="n">02</span> HTTP REST API</a>
+    <a href="#mqtt"><span class="n">03</span> MQTT API</a>
+    <a href="#explore"><span class="n">04</span> Explore &amp; Ask</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- 01 -->
+  <section id="model">
+    <div class="sec-head"><span class="sec-num">01</span><h2>The integration model</h2></div>
+    <p>Sensor data travels from a gateway into the IoT-MOS backend ecosystem. Every reading is organized under registered structure, whichever channel is used to read it.</p>
+
+    <div class="flow">
+      <div class="node"><div class="lbl">Company</div><div class="val">companyId</div><span class="arrow">→</span></div>
+      <div class="node"><div class="lbl">Building</div><div class="val">buildingId</div><span class="arrow">→</span></div>
+      <div class="node"><div class="lbl">Room</div><div class="val">roomId</div><span class="arrow">→</span></div>
+      <div class="node"><div class="lbl">Booth</div><div class="val">boothId</div></div>
+    </div>
+    <p class="muted" style="font-size:14px;margin-top:14px">Identifiers are identical across both channels.</p>
+
+    <h3>Channels</h3>
+    <div class="cards">
+      <div class="card http">
+        <h3>Pull · on demand</h3>
+        <div class="title">HTTP REST</div>
+        <p style="font-size:14.5px;margin-bottom:4px">You ask, we answer. Ideal for reports, dashboards, and historical queries.</p>
+        <ul>
+          <li><b>Protocol</b><span>HTTPS (TLS 1.2+)</span></li>
+          <li><b>Pattern</b><span>Client pulls on demand</span></li>
+          <li><b>Auth</b><span>JWT</span></li>
+          <li><b>Freshness</b><span>As of last query</span></li>
+          <li><b>Best for</b><span>Reports, history, dashboard reloads</span></li>
+        </ul>
+      </div>
+      <div class="card mqtt">
+        <h3>Push · real-time</h3>
+        <div class="title">MQTT</div>
+        <p style="font-size:14.5px;margin-bottom:4px">We push the moment something changes. Ideal for live displays and alerts.</p>
+        <ul>
+          <li><b>Protocol</b><span>MQTT 3.1.1 / 5.0 over TLS</span></li>
+          <li><b>Pattern</b><span>Broker pushes on event</span></li>
+          <li><b>Auth</b><span>X.509 client certificate</span></li>
+          <li><b>Freshness</b><span>Sub-second, event-driven</span></li>
+          <li><b>Best for</b><span>Floor maps, occupancy, alerts</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Side by side</h3>
+    <table class="tbl">
+      <thead><tr><th>Aspect</th><th>HTTP REST</th><th>MQTT</th></tr></thead>
+      <tbody>
+        <tr><td>Transport pattern</td><td>Client pulls on demand</td><td>Broker pushes on event</td></tr>
+        <tr><td>Typical latency</td><td>100 ms – several seconds</td><td>Tens of milliseconds</td></tr>
+        <tr><td>Connection</td><td>Stateless, short-lived</td><td>Persistent, long-lived</td></tr>
+        <tr><td>Rate limit</td><td class="m">1 request / 15 s per tenant</td><td class="h">None — driven by events</td></tr>
+        <tr><td>Delivery</td><td>At-most-once per request</td><td>At-least-once (QoS 1)</td></tr>
+        <tr><td>Replay of past data</td><td class="h">Yes — via status history</td><td class="m">No — live only</td></tr>
+        <tr><td>Not suitable for</td><td>High-frequency polling</td><td>Historical / aggregated queries</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="k">HTTP rate limit — strict</div>
+      <p style="margin:6px 0 0">The HTTP REST API is limited to <b>one request every 15 seconds per tenant</b>. Requests beyond this are rejected with <code>429 Too Many Requests</code>. If you need a faster refresh, that is a real-time use case — use the MQTT channel instead.</p>
+    </div>
+
+    <h3>When to use which</h3>
+    <p><b>HTTP</b> when you need query-shaped access: a daily occupancy report, a BI tool, a dashboard that refreshes on a user click, or a sensor's last-known status at app startup.</p>
+    <p><b>MQTT</b> when you need to react the instant something changes: a live screen showing vacant lockers, push alerts, digital signage. One persistent connection replaces thousands of polls.</p>
+    <p><b>Both (hybrid)</b> for most production deployments: subscribe to MQTT for live state, and call HTTP on startup (to warm caches with last-known values) and on demand (for any past time window). No polling, full depth, comfortably within the rate limit.</p>
+  </section>
+
+  <!-- 02 -->
+  <section id="http">
+    <div class="sec-head"><span class="sec-num">02</span><h2>HTTP REST API</h2></div>
+    <p>The REST API is fully documented as an interactive OpenAPI (Swagger) reference. Browse the endpoints, inspect request and response schemas, and try calls live from the page.</p>
+    <a class="linkbox" href="https://iot-mos.github.io/api-docs/#/" target="_blank" rel="noopener">
+      <span class="lb-ic">OPENAPI</span>
+      <span class="lb-main">
+        <span class="lb-title">Open the REST API reference</span><br>
+        <span class="lb-sub">iot-mos.github.io/api-docs — booth-status-latest, booth-occupancy-latest, booth-status-history</span>
+      </span>
+      <span class="lb-arrow">↗</span>
+    </a>
+    <p class="muted" style="font-size:14px">Authentication is via JWT, obtained by POST. Remember the 1-request-per-15-seconds limit when designing refresh behavior.</p>
+  </section>
+
+  <!-- 03 -->
+  <section id="mqtt">
+    <div class="sec-head"><span class="sec-num">03</span><h2>MQTT API</h2></div>
+    <p>The MQTT channel streams readings in real time from AWS IoT Core. It is documented as an <b>AsyncAPI</b> specification — the messaging-world equivalent of OpenAPI — which renders as an interactive reference and defines every topic, parameter, and payload schema.</p>
+
+    <a class="linkbox" href="#" target="_blank" rel="noopener">
+      <span class="lb-ic">ASYNCAPI</span>
+      <span class="lb-main">
+        <span class="lb-title">Open the MQTT API reference</span><br>
+        <span class="lb-sub">Hosted alongside the REST docs — channels, topic parameters, and payload schemas</span>
+      </span>
+      <span class="lb-arrow">↗</span>
+    </a>
+    <p class="muted" style="font-size:13px;margin-top:-2px">Link to be finalized once the AsyncAPI page is published to GitHub Pages.</p>
+
+    <p class="muted" style="font-size:14px">The reference covers the full topic structure, subscription wildcards, X.509 authentication and tenancy, payload schemas, and how to test a subscription. You connect to AWS IoT Core with an X.509 client certificate bound to your <code>companyId</code>; the broker enforces tenant isolation, so you only receive topics under your own company.</p>
+  </section>
+
+  <!-- 04 -->
+  <section id="explore">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Choosing your channel</h2></div>
+    <p>Three questions settle most decisions:</p>
+    <div class="qa">
+      <div class="q">
+        <div class="ask">Do you need to see changes within one second of them happening?</div>
+        <div class="ans">If yes → <b>MQTT</b></div>
+      </div>
+      <div class="q">
+        <div class="ask">Do you need data from before "now" — yesterday, last week, a custom range?</div>
+        <div class="ans">If yes → <b>HTTP</b></div>
+      </div>
+      <div class="q">
+        <div class="ask">Both of the above?</div>
+        <div class="ans">→ <b>Hybrid</b> — MQTT for live, HTTP (status history) for the past</div>
+      </div>
+    </div>
+    <div class="callout" style="border-left-color:var(--accent);background:#E4007F0f">
+      <div class="k" style="color:var(--accent)">Questions?</div>
+      <p style="margin:6px 0 0">This guide is a starting point — explore the two references and reach out to IoT-MOS API Support with any questions about onboarding, certificates, or designing your integration.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>IoT-MOS API · Integration Guide · v1</span>
+    <span>HTTP REST (OpenAPI) + MQTT (AsyncAPI)</span>
+  </div>
+</footer>
+
+</body>
+</html>
