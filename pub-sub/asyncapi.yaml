@@ -102,9 +102,4 @@ components:
         metrics:
           type: object
           description: Current sensor state.The field names vary according to the type of a sensor. Visit (https://iot-mos.github.io/metric-map/#/)
-      required:
-        - buildingId
-        - roomId
-        - boothId
-        - sensorId
-        - metrics
+
