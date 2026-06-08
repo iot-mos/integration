@@ -1,0 +1,110 @@
+asyncapi: 3.0.0
+
+info:
+  title: IoT-MOS MQTT API
+  version: 1.0.0
+  description: >
+    Real-time  sensor data streamed over MQTT via Iot-Mos system.
+    Subscribe to a topic and the broker pushes a JSON reading whenever a
+    sensor event occurs. Use this channel for live use cases (floor maps,
+    occupancy displays, alerts). For historical or aggregated data, use the
+    HTTP REST API instead.
+  contact:
+    name: IoT-MOS API Support
+  license:
+    name: Proprietary
+
+servers:
+  production:
+    host: '{endpoint}'
+    protocol: secure-mqtt
+    description: >
+      MQTT broker over TLS. The host is your account-specific
+      endpoint, provided by IoT-MOS during onboarding.
+    variables:
+      endpoint:
+        description: Provided by Iot-mos.
+    security:
+      - $ref: '#/components/securitySchemes/x509'
+
+channels:
+  sensorData:
+    address: 'iotmos-api/v1/{env}/{companyId}/{buildingId}/{roomId}/{boothId}'
+    description: >
+      One sensor's live readings. Subscribe with MQTT wildcards to widen scope:
+      use '+' for a single level (all sensors/booths in a room) or '#' for everything
+      below a level (all sensors/booths in a company or building).
+    parameters:
+      env:
+        description: Environment isolation segment.
+        enum:
+          - test
+          - live
+      companyId:
+        description: Tenant root. This is the authorization boundary; you can only subscribe within your own companyId.
+      buildingId:
+        description: Logical site identifier.
+      roomId:
+        description: Logical room identifier.
+      boothId:
+        description: Booth / sensor identifier.
+
+components:
+  securitySchemes:
+    x509:
+      type: x509
+      description: >
+        Mutual TLS using an X.509 client certificate issued by IoT-MOS and
+        bound to your companyId.
+
+  messages:
+    SensorReading:
+      name: SensorReading
+      title: Sensor Status Reading
+      contentType: application/json
+      summary: A single sensor reading for one sensor.
+      payload:
+        $ref: '#/components/schemas/SensorReadingPayload'
+      examples:
+        - name: occupied
+          summary: A sensor reading
+          payload:
+            buildingId: '10'
+            roomId: '12'
+            boothId: '250'
+            sensorId: 'FEE000123'
+            type:"SSA"
+            metrics: {"status":"OPEN","dbm":"-45","timestamp":"2026-04-24T14:47:00.382 JST"}
+
+  schemas:
+    SensorReadingPayload:
+      type: object
+      description: >
+        JSON payload of a sensor status reading. Field set is indicative;
+        refer to onboarding materials for the authoritative sensor schema
+        per sensor type.
+      properties:
+        buildingId:
+          type: string
+          description: Logical site identifier.
+        roomId:
+          type: string
+          description: Logical room identifier.
+        boothId:
+          type: string
+          description: Logical sensor identifier.
+        sensorId:
+          type: string
+          description: Physical sensor identifier.
+        type:
+          type: string
+          description: Sensor type
+        metrics:
+          type: JSONObject
+          description: Current sensor state.The field names vary according to the type of a sensor. Visit (https://iot-mos.github.io/metric-map/#/)
+      required:
+        - buildingId
+        - roomId
+        - sensorId
+        - metrics
+        - timestamp
