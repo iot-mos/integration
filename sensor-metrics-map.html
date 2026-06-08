@@ -1,1 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IoT-MOS Sensor Metric Map</title>
+  <link rel="icon" type="image/svg+xml" href="req-res/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--text:#3b4151;--blue:#61affe;--blue-bg:rgba(97,175,254,.1);--border:#d9d9d9;--muted:#62676d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{background:#fafafa;color:var(--text);font-family:"Open Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+    h1,h2,h3,h4{font-family:"Titillium Web",sans-serif}
+    code,.mono{font-family:"Source Code Pro",monospace}
+    a{color:#4990e2;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .site-header{background:#dedede;color:#fff;padding:12px 32px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+    .site-header img{height:40px;width:auto}
+    .ui{max-width:1100px;margin:0 auto;padding:20px}
+    .info{margin:30px 22px 10px}
+    .info .title{font-size:36px;font-weight:600;color:var(--text);margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+    .info .spec-badge{font-family:"Source Code Pro",monospace;font-size:11px;font-weight:600;color:#3b4151;border:2px solid #3b4151;border-radius:4px;padding:2px 6px;letter-spacing:.04em}
+    .info .description{margin-top:14px;font-size:15px;color:#3b4151;max-width:72ch}
+    .callout{margin:18px 22px;background:#fff;border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.08);padding:14px 18px}
+    .callout .k{font-family:"Titillium Web";font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue)}
+    .callout p{margin:6px 0 0;color:#3b4151}
+    .opblock-tag{font-family:"Titillium Web";font-size:24px;font-weight:600;color:var(--text);margin:36px 22px 0;padding:12px 0 8px;border-bottom:1px solid rgba(59,65,81,.3);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .opblock-tag .small{font-family:"Open Sans";font-size:13px;font-weight:400;color:var(--muted)}
+    .controls{margin-left:auto;display:flex;gap:8px}
+    .controls button{font-family:"Titillium Web";font-size:12px;font-weight:600;color:var(--text);background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 12px;cursor:pointer}
+    .controls button:hover{border-color:var(--blue);color:var(--blue)}
+    .idx{margin:14px 22px 0;display:flex;gap:8px;flex-wrap:wrap}
+    .idx a{font-family:"Source Code Pro",monospace;font-size:12px;font-weight:600;color:var(--text);background:#fff;border:1px solid var(--border);border-radius:20px;padding:4px 12px}
+    .idx a:hover{border-color:var(--blue);color:var(--blue);text-decoration:none}
+    .opblock{margin:15px 22px;border:1px solid var(--blue);border-radius:4px;background:var(--blue-bg);box-shadow:0 0 3px rgba(0,0,0,.19);scroll-margin-top:14px}
+    .opblock-summary{display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer}
+    .method{font-family:"Source Code Pro",monospace;font-weight:600;font-size:13px;color:#fff;background:var(--blue);border-radius:3px;padding:7px 12px;min-width:104px;text-align:center;text-shadow:0 1px 0 rgba(0,0,0,.1)}
+    .summary-path{font-family:"Source Code Pro",monospace;font-size:16px;font-weight:600;color:var(--text);word-break:break-all}
+    .summary-desc{margin-left:auto;text-align:right;font-size:13px;color:var(--muted)}
+    .caret{margin-left:6px;color:var(--text);transition:transform .15s}
+    .opblock.collapsed .caret{transform:rotate(-90deg)}
+    .opblock.collapsed .opblock-body{display:none}
+    .opblock-body{padding:6px 16px 16px}
+    .tbl-wrap{overflow-x:auto;background:#fff;border:1px solid rgba(59,65,81,.12);border-radius:4px}
+    table.tbl{width:100%;border-collapse:collapse;min-width:380px}
+    table.tbl thead th{text-align:left;font-family:"Titillium Web";font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.03em;padding:10px 12px;border-bottom:1px solid rgba(59,65,81,.2);white-space:nowrap}
+    table.tbl td{padding:11px 12px;border-bottom:1px solid rgba(59,65,81,.1);vertical-align:top}
+    table.tbl tr:last-child td{border-bottom:none}
+    .p-name{font-family:"Source Code Pro",monospace;font-weight:600;font-size:14px;color:var(--text)}
+    .cond{display:inline-block;font-family:"Source Code Pro",monospace;font-size:12px;background:#f2f4f7;border:1px solid var(--border);border-radius:4px;padding:1px 7px;margin:2px 4px 2px 0;color:var(--text)}
+    .numeric{display:inline-block;white-space:nowrap;font-family:"Titillium Web";font-size:12px;font-weight:600;color:#4990e2;background:rgba(97,175,254,.12);border:1px solid rgba(97,175,254,.45);border-radius:4px;padding:2px 9px}
+    .unit{font-family:"Source Code Pro",monospace;font-size:13px;color:var(--text)}
+    .dash{color:#b3b8bd}
+    footer{margin:50px 22px 40px;padding-top:16px;border-top:1px solid var(--border);font-family:"Source Code Pro",monospace;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <header class="site-header"><img src="req-res/logo.png" alt="IoT-MOS logo"></header>
+  <div class="ui">
+    <div class="info">
+      <h2 class="title">IoT-MOS Sensor Metric Map <span class="spec-badge">REFERENCE</span></h2>
+      <div class="description">
+        The <code>metrics</code> object in a sensor reading varies by sensor type. This page lists which
+        metric fields appear for each sensor, with the JSON key and the value you can expect. Derived
+        from <code>com.daisen.enums.SensorType</code> / <code>MetricType</code>. JSON keys are the
+        lowercased output names used in the published payload.
+      </div>
+    </div>
 
+    <div class="callout">
+      <div class="k">Value encoding</div>
+      <p>Every metric value is transmitted as a <b>JSON string</b>. Numeric metrics are numbers in string
+      form (e.g. <code>"2.96"</code>) and are shown below as <span class="numeric">Numeric (string)</span>;
+      state metrics are string literals (e.g. <code>"OPEN"</code>).</p>
+    </div>
+
+    <div class="callout">
+      <div class="k">Always present</div>
+      <p>In addition to the type-specific fields below, every <code>metrics</code> object also includes
+      <code>dbm</code> (radio signal strength, in dBm), and every reading carries a <code>timestamp</code>.</p>
+    </div>
+
+    <div class="opblock-tag">Sensor types <span class="small">16 sensors</span>
+      <span class="controls">
+        <button onclick="setAll(false)">Expand all</button>
+        <button onclick="setAll(true)">Collapse all</button>
+      </span>
+    </div>
+    <div class="idx"><a href="#SWITCH">SWITCH</a>
+<a href="#MAGNET">MAGNET</a>
+<a href="#SSA">SSA</a>
+<a href="#SSAREVERSE">SSAREVERSE</a>
+<a href="#TABLEKEEPER">TABLEKEEPER</a>
+<a href="#DISTANCE">DISTANCE</a>
+<a href="#DISTANCEGP">DISTANCEGP</a>
+<a href="#MOTION">MOTION</a>
+<a href="#MOTIONILLUMINATION">MOTIONILLUMINATION</a>
+<a href="#MULTISENSOR">MULTISENSOR</a>
+<a href="#CURRENTSENSOR">CURRENTSENSOR</a>
+<a href="#THERMISTORSENSOR">THERMISTORSENSOR</a>
+<a href="#THERMOCOUPLESENSOR">THERMOCOUPLESENSOR</a>
+<a href="#WATERLEAKSENSOR">WATERLEAKSENSOR</a>
+<a href="#CO2">CO2</a>
+<a href="#ENOCEANCONTACTIO">ENOCEANCONTACTIO</a></div>
+
+    <div class="opblock" id="SWITCH"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">F6-02-04-SW</span><span class="summary-path">SWITCH</span><span class="summary-desc">Switch · リモコンスイッチ · 2 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">status</span></td><td><span class="dash">—</span></td><td><code class="cond">RELEASED</code><code class="cond">PRESSED</code></td></tr>
+<tr><td><span class="p-name">position</span></td><td><span class="dash">—</span></td><td><span class="numeric">Numeric (string)</span></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="MAGNET"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">D5-00-01</span><span class="summary-path">MAGNET</span><span class="summary-desc">Magnet Sensor · マグネットセンサー · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">status</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="SSA"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">F6-02-04</span><span class="summary-path">SSA</span><span class="summary-desc">Switch Strike Air · スイッチストライクエアー · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">status</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="SSAREVERSE"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">F6-02-04-R</span><span class="summary-path">SSAREVERSE</span><span class="summary-desc">Switch Strike Air - Reversed · スイッチストライクエアーリバース · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">status</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="TABLEKEEPER"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">F6-02-04</span><span class="summary-path">TABLEKEEPER</span><span class="summary-desc">Table Keeper · テーブルキーパー · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">status</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code><code class="cond">ON</code><code class="cond">OFF</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="DISTANCE"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">F6-02-04</span><span class="summary-path">DISTANCE</span><span class="summary-desc">Distance Sensor · 距離センサー · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">status</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="DISTANCEGP"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">GP-DG-85</span><span class="summary-path">DISTANCEGP</span><span class="summary-desc">Distance Sensor GP · 距離センサー GP · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">distance</span></td><td><span class="unit">m</span></td><td><span class="numeric">Numeric (string)</span></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="MOTION"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">A5-07-01</span><span class="summary-path">MOTION</span><span class="summary-desc">Motion Sensor · 人感センサー · 7 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">occupancy</span></td><td><span class="dash">—</span></td><td><code class="cond">OCCUPIED</code><code class="cond">VACANT</code></td></tr>
+<tr><td><span class="p-name">supplyvoltage</span></td><td><span class="unit">v</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">voltagesupported</span></td><td><span class="dash">—</span></td><td><code class="cond">YES</code><code class="cond">NO</code></td></tr>
+<tr><td><span class="p-name">remainingenergy</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">harvesterenergy</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">backupbattery</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">apmode</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="MOTIONILLUMINATION"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">A5-07-03</span><span class="summary-path">MOTIONILLUMINATION</span><span class="summary-desc">Motion-Illumination Sensor · 人感＆照度センサー · 7 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">occupancy</span></td><td><span class="dash">—</span></td><td><code class="cond">OCCUPIED</code><code class="cond">VACANT</code></td></tr>
+<tr><td><span class="p-name">luminosity</span></td><td><span class="unit">lx</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">supplyvoltage</span></td><td><span class="unit">v</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">remainingenergy</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">harvesterenergy</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">backupbattery</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">apmode</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="MULTISENSOR"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">D2-14-41</span><span class="summary-path">MULTISENSOR</span><span class="summary-desc">Multi Sensor · マルチセンサー · 13 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">temperature</span></td><td><span class="unit">°C</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">humidity</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">wbgt</span></td><td><span class="unit">°C</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">luminosity</span></td><td><span class="unit">lx</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">accelerationstatus</span></td><td><span class="dash">—</span></td><td><code class="cond">Threshold 1 exceeded</code><code class="cond">Periodic Update</code></td></tr>
+<tr><td><span class="p-name">accelerationx</span></td><td><span class="unit">g</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">accelerationy</span></td><td><span class="unit">g</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">accelerationz</span></td><td><span class="unit">g</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">contactstatus</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code></td></tr>
+<tr><td><span class="p-name">remainingenergy</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">harvesterenergy</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">backupbattery</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">apmode</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="CURRENTSENSOR"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">D2-32-02</span><span class="summary-path">CURRENTSENSOR</span><span class="summary-desc">Current Sensor · 電流センサー · 7 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">mainline</span></td><td><span class="dash">—</span></td><td><code class="cond">OPEN</code><code class="cond">CLOSE</code></td></tr>
+<tr><td><span class="p-name">channel1</span></td><td><span class="unit">ampere</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">channel2</span></td><td><span class="unit">ampere</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">channel3</span></td><td><span class="unit">ampere</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">channel1status</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr>
+<tr><td><span class="p-name">channel2status</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr>
+<tr><td><span class="p-name">channel3status</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="THERMISTORSENSOR"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">GP-TS-85</span><span class="summary-path">THERMISTORSENSOR</span><span class="summary-desc">Thermistor Sensor · サーミスター · 3 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">temperaturech1</span></td><td><span class="unit">°C</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">temperaturech2</span></td><td><span class="unit">°C</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">batteryvoltage</span></td><td><span class="unit">v</span></td><td><span class="numeric">Numeric (string)</span></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="THERMOCOUPLESENSOR"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">GP-TC-85</span><span class="summary-path">THERMOCOUPLESENSOR</span><span class="summary-desc">Thermocouple Sensor · 熱電対センサー · 1 metric</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">temperature</span></td><td><span class="unit">°C</span></td><td><span class="numeric">Numeric (string)</span></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="WATERLEAKSENSOR"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">D2-14-53</span><span class="summary-path">WATERLEAKSENSOR</span><span class="summary-desc">Water Leak Sensor · 漏水センサー · 2 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">leakdetection</span></td><td><span class="dash">—</span></td><td><code class="cond">LEAK</code><code class="cond">NO_LEAK</code></td></tr>
+<tr><td><span class="p-name">pastleakdetection</span></td><td><span class="dash">—</span></td><td><code class="cond">LEAK</code><code class="cond">NO_LEAK</code></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="CO2"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">A5-09-04</span><span class="summary-path">CO2</span><span class="summary-desc">CO2 Sensor · CO2センサー · 3 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">temperature</span></td><td><span class="unit">°C</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">humidity</span></td><td><span class="unit">%</span></td><td><span class="numeric">Numeric (string)</span></td></tr>
+<tr><td><span class="p-name">co2</span></td><td><span class="unit">ppm</span></td><td><span class="numeric">Numeric (string)</span></td></tr></tbody></table></div></div></div>
+<div class="opblock" id="ENOCEANCONTACTIO"><div class="opblock-summary" onclick="this.parentNode.classList.toggle('collapsed')"><span class="method">F6-02-04-CIO</span><span class="summary-path">ENOCEANCONTACTIO</span><span class="summary-desc">Enocean Contact IO · EnOcean 接点I/O · 2 metrics</span><span class="caret">▾</span></div><div class="opblock-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:240px">Field (JSON key)</th><th style="width:120px">Unit</th><th>Value</th></tr></thead><tbody><tr><td><span class="p-name">ch1</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr>
+<tr><td><span class="p-name">ch2</span></td><td><span class="dash">—</span></td><td><code class="cond">ON</code><code class="cond">OFF</code></td></tr></tbody></table></div></div></div>
+
+    <footer>IoT-MOS Sensor Metric Map · generated from MetricType / SensorType enums</footer>
+  </div>
+  <script>
+    function setAll(collapsed){document.querySelectorAll('.opblock').forEach(function(b){b.classList.toggle('collapsed',collapsed);});}
+  </script>
+</body>
+</html>
