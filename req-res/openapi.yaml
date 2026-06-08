@@ -1,0 +1,553 @@
+openapi: "3.0.1"
+info:
+  title: "API 仕様 Iot-mos"
+  version: "v2"
+  description: |
+    iot-mosプラットフォーム向けAPIです。/auth/token を除くすべてのエンドポイントを利用するには、認証エンドポイントから取得した有効なJWT（JSON Web Token）が必要です。
+
+    ご利用手順
+
+    1. 本ページ上部にあるサーバー変数 baseUrl に、管理者から提供された値を設定してください。
+    2. ユーザーの認証情報を使用して POST /api/v2/auth/token を呼び出し、JWTを取得します。
+    3. 画面右上にある緑色の Authorize ボタンをクリックし、取得したJWTを貼り付けてから「Authorize」をクリックしてください。
+    4. これで、他のすべてのエンドポイントにて「Try it out」機能をご利用いただけます。
+    
+    本API群は、センサーを搭載したIoTセンサーの状態を監視・管理するための情報を提供します。主に以下の2つの用途に対応しています。
+    
+    - **最新ステータス取得API** (`/api/v2/booth-status-latest/**`)
+       最新のセンサー状態を取得するためのエンドポイントです。リアルタイムでの状況把握に利用できます。
+
+    - **過去ステータス履歴API** (`/api/v2/booth-status-history/**`)
+       指定した期間のセンサー状態の履歴データを取得するためのエンドポイントです。主に分析や可視化用途にご利用ください。
+    
+    - **最新の占有率取得API** (`/api/v2/booth-occupancy-latest/**`)
+       最新のセンサー有率を取得するためのエンドポイントです。リアルタイムでの状況把握に利用できます。
+
+
+servers:
+  - url: "{baseUrl}"
+    variables:
+      baseUrl:
+        default: "https://api.your-host.com"
+        description: "Base URL of the iot-mos API (contact administrator)"
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth
+    description: 認証 - トークン取得
+  - name: Booth status
+    description: 最新ステータス取得API
+  - name: Booth occupancy
+    description: 最新の占有率取得API
+  - name: Booth history
+    description: 過去ステータス履歴API
+
+paths:
+
+  /api/v2/auth/token:
+    post:
+      tags: [Auth]
+      summary: JWTの取得
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+            examples:
+              default:
+                value:
+                  username: "your-user"
+                  password: "your-password"
+      responses:
+        "200":
+          description: Token issued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+              examples:
+                default:
+                  value:
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                default:
+                  value:
+                    message: "Invalid credentials"
+
+  /api/v2/booth-status-latest/by-building-id/{buildingId}:
+    get:
+      tags: [Booth status]
+      summary: 指定したビルに登録されている全センサーの最新ステータスを取得します。
+
+      parameters:
+        - $ref: "#/components/parameters/BuildingId"
+      responses:
+        "200":
+          description: Building status payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildingStatus"
+              examples:
+                populated:
+                  summary: Building with rooms and booths
+                  value:
+                    buildingid: "38"
+                    buildingname: "HQ Building"
+                    rooms:
+                      - roomid: "69"
+                        roomname: "会議室-1"
+                        booths:
+                          - boothid: "473"
+                            boothname: "Booth 473"
+                            sensorid: "FEE72924"
+                            type: "SSA"
+                            metrics:
+                              status: "CLOSE"
+                              dbm: "-43"
+                              timestamp: "2026-04-24T14:47:00.382 JST"
+                empty:
+                  summary: Unknown or cross-tenant building
+                  value:
+                    buildingid: "99999"
+                    buildingname: ""
+                    rooms: []
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v2/booth-status-latest/by-room-id/{roomId}:
+    get:
+      tags: [Booth status]
+      summary: 指定したルーム内の全センサーの最新ステータスを取得します。
+      parameters:
+        - $ref: "#/components/parameters/RoomId"
+      responses:
+        "200":
+          description: Room status payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomStatus"
+              examples:
+                populated:
+                  summary: Room with booths
+                  value:
+                    roomid: "69"
+                    roomname: "会議室-1"
+                    booths:
+                      - boothid: "473"
+                        boothname: "Booth 473"
+                        sensorid: "FEE72924"
+                        type: "SSA"
+                        metrics:
+                          status: "CLOSE"
+                          dbm: "-43"
+                          timestamp: "2026-04-24T14:47:00.382 JST"
+                      - boothid: "490"
+                        boothname: "Booth 490"
+                        sensorid: "MULTI-490"
+                        type: "MULTISENSOR"
+                        metrics:
+                          contactstatus: "OPEN"
+                          temperature: "23.5"
+                          humidity: "48.0"
+                          luminosity: "446"
+                          wbgt: "19.1"
+                          accelerationx: "-0.030"
+                          accelerationy: "-0.055"
+                          accelerationz: "1.030"
+                          dbm: "-61"
+                          timestamp: "2026-04-24T14:47:00.382 JST"
+                empty:
+                  summary: Unknown room
+                  value:
+                    roomid: "99999"
+                    roomname: ""
+                    booths: []
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v2/booth-occupancy-latest/by-building-id/{buildingId}:
+    get:
+      tags: [Booth occupancy]
+      summary: 指定したビルに登録されている全ルームの現在の占有率を取得します。
+      parameters:
+        - $ref: "#/components/parameters/BuildingId"
+      responses:
+        "200":
+          description: Building occupancy payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildingOccupancy"
+              examples:
+                populated:
+                  value:
+                    buildingid: "38"
+                    rooms:
+                      - roomid: "107"
+                        totalbooths: 1
+                        inusebooths: 0
+                        usagerate: 0
+                      - roomid: "69"
+                        totalbooths: 12
+                        inusebooths: 1
+                        usagerate: 8.33
+                    totalbooths: 13
+                    totalinusebooths: 1
+                    overallusagerate: 7.69
+                empty:
+                  value:
+                    buildingid: "99999"
+                    rooms: []
+                    totalbooths: 0
+                    totalinusebooths: 0
+                    overallusagerate: 0
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v2/booth-occupancy-latest/by-room-id/{roomId}:
+    get:
+      tags: [Booth occupancy]
+      summary: 指定したルームの現在の占有率を取得します。
+      parameters:
+        - $ref: "#/components/parameters/RoomId"
+      responses:
+        "200":
+          description: Room occupancy payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomOccupancy"
+              examples:
+                populated:
+                  value:
+                    roomid: "69"
+                    totalbooths: 12
+                    inusebooths: 1
+                    usagerate: 8.33
+                empty:
+                  value:
+                    roomid: "99999"
+                    totalbooths: 0
+                    inusebooths: 0
+                    usagerate: 0
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v2/booth-status-history/by-booth-id/{boothId}:
+    get:
+      tags: [Booth history]
+      summary: 指定した日付範囲の間に記録されたセンサーの履歴データを取得します。
+      description: |
+        **✅ 対応フォーマット：**
+        
+            fromDate  toDate:
+           - `yyyy-MM-dd'T'HH:mm:ss` (e.g. `2024-08-01T08:30:00`)
+           - `yyyy-MM-dd` (e.g. `2024-08-01`)
+      parameters:
+        - $ref: "#/components/parameters/BoothId"
+        - name: fromDate
+          in: query
+          required: true
+          description: Inclusive start of the range, JST calendar date.
+          schema:
+            type: string
+            format: date
+            example: "2026-04-23"
+        - name: toDate
+          in: query
+          required: true
+          description: Inclusive end of the range, JST calendar date.
+          schema:
+            type: string
+            format: date
+            example: "2026-04-24"
+      responses:
+        "200":
+          description: History payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BoothHistory"
+              examples:
+                populated:
+                  value:
+                    sensorid: "FEE72924"
+                    sensortype: "SSA"
+                    buildingid: "38"
+                    roomid: "69"
+                    boothid: "473"
+                    metrics:
+                      - dbm: "-41"
+                        gwid: "48:A4:93:7F:66:B9"
+                        status: "OPEN"
+                        timestamp: "2026-04-24T14:47:00.074 JST"
+                      - dbm: "-41"
+                        gwid: "48:A4:93:7F:66:B9"
+                        status: "CLOSE"
+                        timestamp: "2026-04-24T14:47:00.382 JST"
+                empty:
+                  value:
+                    metrics: []
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT obtained from `POST /api/v2/auth/token`. Sent as
+        `Authorization: Bearer <token>` on every request.
+
+  parameters:
+    BuildingId:
+      name: buildingId
+      in: path
+      required: true
+      description: 拠点No Building identifier as registered in BoothRegistry.
+      schema:
+        type: string
+        example: "38"
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      description: 施設No Room identifier as registered in BoothRegistry.
+      schema:
+        type: string
+        example: "69"
+    BoothId:
+      name: boothId
+      in: path
+      required: true
+      description: センサーNo Booth identifier as registered in BoothRegistry.
+      schema:
+        type: string
+        example: "473"
+
+  responses:
+    BadRequest:
+      description: The request was malformed (missing or invalid parameters).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            default:
+              value:
+                message: "Invalid request"
+    Unauthorized:
+      description: |
+        The `Authorization` header is missing, malformed, or the JWT is
+        invalid or expired.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            missing:
+              summary: Header missing
+              value:
+                message: "Missing authorization header"
+            malformed:
+              summary: Token malformed
+              value:
+                message: "Malformed token"
+
+  schemas:
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    TokenRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+
+    TokenResponse:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: JWT bearer token, valid for a limited period.
+
+    Booth:
+      type: object
+      description: One booth and its most recent sensor reading.
+      properties:
+        boothid:
+          type: string
+          example: "473"
+        boothname:
+          type: string
+          example: "Booth 473"
+        sensorid:
+          type: string
+          example: "FEE72924"
+        type:
+          type: string
+          description: Sensor type as stored in the registry.
+          example: "SSA"
+          enum:
+            - ""
+            - SSA
+            - SSAREVERSE
+            - MULTISENSOR
+            - MOTION
+            - MOTIONILLUMINATION
+            - MAGNET
+            - DISTANCE
+            - TABLEKEEPER
+            - CURRENTSENSOR
+            - ENOCEANCONTACTIO
+            - SWITCH
+        metrics:
+          type: object
+          description: |
+            Sensor-specific key/value map. Keys are lowercase. For
+            CURRENTSENSOR booths, only channels listed in the registry's
+            `sub_sensors` are returned. Silent booths (no events) return an
+            empty object.
+          additionalProperties:
+            type: string
+          example:
+            status: "CLOSE"
+            dbm: "-43"
+      required: [boothid, boothname, sensorid, type, metrics]
+
+    RoomStatus:
+      type: object
+      properties:
+        roomid:
+          type: string
+        roomname:
+          type: string
+        booths:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booth"
+      required: [roomid, roomname, booths]
+
+    BuildingStatus:
+      type: object
+      properties:
+        buildingid:
+          type: string
+        buildingname:
+          type: string
+        rooms:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomStatus"
+      required: [buildingid, buildingname, rooms]
+
+    RoomOccupancy:
+      type: object
+      properties:
+        roomid:
+          type: string
+        totalbooths:
+          type: integer
+          description: |
+            Registered booths in the room. CURRENTSENSOR booths contribute
+            one virtual booth per registered sub-sensor channel.
+        inusebooths:
+          type: integer
+          description: Booths whose latest reading matches the in-use rule for their sensor type.
+        usagerate:
+          type: number
+          format: float
+          description: "`inusebooths / totalbooths * 100`, rounded to 2 decimal places."
+          example: 8.33
+      required: [roomid, totalbooths, inusebooths, usagerate]
+
+    BuildingOccupancy:
+      type: object
+      properties:
+        buildingid:
+          type: string
+        rooms:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomOccupancy"
+        totalbooths:
+          type: integer
+        totalinusebooths:
+          type: integer
+        overallusagerate:
+          type: number
+          format: float
+          example: 7.69
+      required: [buildingid, rooms, totalbooths, totalinusebooths, overallusagerate]
+
+    HistoryReading:
+      type: object
+      description: One sensor reading at a point in time.
+      additionalProperties:
+        type: string
+      example:
+        timestamp: "2026-04-24T14:47:00.074 JST"
+        status: "OPEN"
+        dbm: "-41"
+        gwid: "48:A4:93:7F:66:B9"
+
+    BoothHistory:
+      type: object
+      description: |
+        Flattened static fields plus an array of per-reading metric objects.
+        Static fields are omitted when the result set is empty.
+      properties:
+        sensorid:
+          type: string
+        sensortype:
+          type: string
+        companyid:
+          type: string
+        buildingid:
+          type: string
+        roomid:
+          type: string
+        boothid:
+          type: string
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/HistoryReading"
+      required: [metrics]
