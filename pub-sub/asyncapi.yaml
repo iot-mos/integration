@@ -52,7 +52,7 @@ channels:
 components:
   securitySchemes:
     x509:
-      type: x509
+      type: X509
       description: >
         Mutual TLS using an X.509 client certificate issued by IoT-MOS and
         bound to your companyId.
@@ -73,7 +73,7 @@ components:
             roomId: '12'
             boothId: '250'
             sensorId: 'FEE000123'
-            type:"SSA"
+            type: "SSA"
             metrics: {"status":"OPEN","dbm":"-45","timestamp":"2026-04-24T14:47:00.382 JST"}
 
   schemas:
@@ -100,11 +100,10 @@ components:
           type: string
           description: Sensor type
         metrics:
-          type: JSONObject
+          type: object
           description: Current sensor state.The field names vary according to the type of a sensor. Visit (https://iot-mos.github.io/metric-map/#/)
       required:
         - buildingId
         - roomId
         - sensorId
         - metrics
-        - timestamp
