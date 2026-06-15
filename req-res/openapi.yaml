@@ -49,7 +49,7 @@ paths:
   /api/v2/auth/token:
     post:
       tags: [Auth]
-      summary: JWTの取得
+      summary: JWTの取得 - トークンの期限は1週間です
       security: []
       requestBody:
         required: true
