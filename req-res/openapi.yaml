@@ -72,7 +72,7 @@ paths:
               examples:
                 default:
                   value:
-                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    token: "<your-jwt-here>"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
