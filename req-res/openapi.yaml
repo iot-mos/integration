@@ -294,7 +294,7 @@ paths:
                 populated:
                   value:
                     sensorid: "FEE72924"
-                    sensortype: "SSA"
+                    type: "SSA"
                     buildingid: "38"
                     roomid: "69"
                     boothid: "473"
@@ -536,7 +536,7 @@ components:
       properties:
         sensorid:
           type: string
-        sensortype:
+        type:
           type: string
         companyid:
           type: string
