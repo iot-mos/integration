@@ -147,7 +147,7 @@
           <tr><td>Transport pattern</td><td>Client pulls on demand</td><td>Broker pushes on event</td></tr>
           <tr><td>Typical latency</td><td>100 ms &ndash; several seconds</td><td>Tens of milliseconds</td></tr>
           <tr><td>Connection</td><td>Stateless, short-lived</td><td>Persistent, long-lived</td></tr>
-          <tr><td>Rate limit</td><td class="g">1 request / 15 s per tenant</td><td class="b">None &mdash; driven by events</td></tr>
+          <tr><td>Rate limit</td><td class="g">1 request / 1 min per tenant</td><td class="b">None &mdash; driven by events</td></tr>
           <tr><td>Delivery</td><td>At-most-once per request</td><td>At-least-once (QoS 1)</td></tr>
           <tr><td>Replay of past data</td><td class="b">Yes &mdash; via status history</td><td class="g">No &mdash; live only</td></tr>
           <tr><td>Not suitable for</td><td>High-frequency polling</td><td>Historical / aggregated queries</td></tr>
@@ -156,7 +156,7 @@
 
       <div class="callout">
         <div class="k">HTTP rate limit &mdash; strict</div>
-        <p>The HTTP REST API is limited to <b>one request every 15 seconds per tenant</b>. Requests beyond this are rejected with <code>429 Too Many Requests</code>. If you need a faster refresh, that&rsquo;s a real-time use case &mdash; use the MQTT channel instead.</p>
+        <p>The HTTP REST API is limited to <b>one request every 1 minute per tenant</b>. Requests beyond this are rejected with <code>429 Too Many Requests</code>. If you need a faster refresh, that&rsquo;s a real-time use case &mdash; use the MQTT channel instead.</p>
       </div>
 
       <p><b>Use HTTP</b> for query-shaped access: a daily occupancy report, a BI tool, a dashboard that refreshes on a click, or a sensor&rsquo;s last-known status at app startup.</p>
