@@ -155,8 +155,8 @@
       </table>
 
       <div class="callout">
-        <div class="k">HTTP rate limit &mdash; strict</div>
-        <p>The HTTP REST API is limited to <b>one request every 1 minute per tenant</b>. Requests beyond this are rejected with <code>429 Too Many Requests</code>. If you need a faster refresh, that&rsquo;s a real-time use case &mdash; use the MQTT channel instead.</p>
+        <div class="k">HTTP Limitation</div>
+        <p>The HTTP API is limited to <b>one request every 1 minute per booth(sensor)</b>. If you need a faster refresh, that&rsquo;s a real-time use case &mdash; use the MQTT channel instead.</p>
       </div>
 
       <p><b>Use HTTP</b> for query-shaped access: a daily occupancy report, a BI tool, a dashboard that refreshes on a click, or a sensor&rsquo;s last-known status at app startup.</p>
