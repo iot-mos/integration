@@ -258,7 +258,7 @@ paths:
   /api/v2/booth-status-history/by-booth-id/{boothId}:
     get:
       tags: [Booth history]
-      summary: 指定した日付範囲の間に記録されたセンサーの履歴データを取得します。
+      summary: 指定した日付範囲の間に記録されたセンサーの履歴データを取得します。サイズ上限：6MB、期間上限：31日間
       description: |
         **✅ 対応フォーマット：**
         
